@@ -9,6 +9,7 @@ class InsuranceRateCreate(BaseModel):
 
 
 class InsuranceRateResponse(BaseModel):
+    id: int
     cargo_type: str
     rate: float
     effective_date: date
