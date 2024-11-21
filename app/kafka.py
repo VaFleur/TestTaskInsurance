@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 
 KAFKA_CONFIG = {
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': 'kafka:9092',
     'client.id': 'insurance-api'
 }
 
