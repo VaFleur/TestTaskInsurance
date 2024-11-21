@@ -15,14 +15,27 @@ async def calculate_insurance(
     cargo_type: str,
     declared_value: float,
     date: date = date.today(),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user_id: int = None
 ):
     rate = await get_insurance_rate(db, cargo_type, date)
     if not rate:
         raise HTTPException(status_code=404, detail="Rate not found for the specified cargo type and date")
 
     insurance_cost = declared_value * rate.rate
-    return {"cargo_type": cargo_type, "declared_value": declared_value, "rate": rate.rate, "insurance_cost": insurance_cost}
+
+    send_log_message(
+        user_id=user_id,
+        action="calculate_insurance",
+        timestamp=datetime.utcnow()
+    )
+
+    return {
+        "cargo_type": cargo_type,
+        "declared_value": declared_value,
+        "rate": rate.rate,
+        "insurance_cost": insurance_cost
+    }
 
 
 @router.post("/rate", response_model=InsuranceRateResponse)
