@@ -23,7 +23,6 @@ async def get_insurance_rate(db: AsyncSession, cargo_type: str, date):
         InsuranceRate.cargo_type == cargo_type,
         InsuranceRate.effective_date <= date
     ).order_by(InsuranceRate.effective_date.desc())
-
     result = await db.execute(query)
     return result.scalars().first()
 
