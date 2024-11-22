@@ -9,6 +9,7 @@
 - FastAPI
 - PostgreSQL
 - SQLAlchemy
+- Kafka
 - Docker & Docker Compose
 
 ## Установка и запуск
@@ -32,13 +33,30 @@ docker compose up --build
 docker compose exec web python -m app.main
 ```
 
-### 4. Открытие приложения в браузере
+### 4. Создане топика в Kafka
+```commandline
+docker-compose exec kafka kafka-topics --create \
+  --topic insurance-logs \
+  --bootstrap-server kafka:9092 \
+  --partitions 1 \
+  --replication-factor 1
+```
+
+### 5. Просмотр логов топика
+```commandline
+docker-compose exec kafka kafka-console-consumer \
+  --topic insurance-logs \
+  --from-beginning \
+  --bootstrap-server kafka:9092
+```
+
+### 6. Открытие приложения в браузере
 Перейдите по адресу:
 ```
 http://localhost:8000/docs
 ```
 
-## Примеры использования
+## Использование API
 
 ### 1. Добавление тарифа
 - URL: /api/rate
@@ -52,7 +70,29 @@ http://localhost:8000/docs
 }
 ```
 
-### 2. Расчёт стоимости страхования
+### 2. Редактирование тарифа
+- URL: /api/rate/{rate_id}
+- Метод: PUT
+- Тело запроса:
+```commandline
+{
+  "rate": 0.07,
+}
+```
+
+### 3. Удаление тарифа
+- URL: /api/rate/{rate_id}
+- Метод: DELETE
+
+### 4. Получение тарифа
+- URL: /api/rate/{rate_id}
+- Метод: GET
+
+### 5. Получение всех тарифов
+- URL: /api/rates
+- Метод: GET
+
+### 6. Расчёт стоимости страхования
 - URL: /api/calculate
 - Метод: GET
 - Пример запроса:

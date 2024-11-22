@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import date, datetime
 from app.database import get_db
 from app.schemas import InsuranceRateCreate, InsuranceRateResponse
-from app.crud import create_insurance_rate, get_insurance_rate, update_insurance_rate, delete_insurance_rate
+from app.crud import create_insurance_rate, get_insurance_rate, update_insurance_rate, delete_insurance_rate, \
+    fetch_all_rates, fetch_rate_by_id
 from app.kafka import send_log_message
 
 router = APIRouter()
@@ -63,3 +64,39 @@ async def delete_rate(rate_id: int, db: AsyncSession = Depends(get_db), user_id:
         return {"message": f"Rate with id {rate_id} has been deleted"}
     except NoResultFound as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/rates")
+async def get_all_rates(
+    db: AsyncSession = Depends(get_db),
+    user_id: int = None
+):
+    rates = await fetch_all_rates(db)
+
+    send_log_message(
+        user_id=user_id,
+        action="view_all_rates",
+        timestamp=datetime.utcnow()
+    )
+
+    return rates
+
+
+@router.get("/rate/{rate_id}", response_model=InsuranceRateResponse)
+async def get_rate_by_id(
+    rate_id: int,
+    db: AsyncSession = Depends(get_db),
+    user_id: int = None
+):
+    try:
+        rate = await fetch_rate_by_id(db, rate_id)  # Вызов функции из crud.py
+    except NoResultFound as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    send_log_message(
+        user_id=user_id,
+        action="view_single_rate",
+        timestamp=datetime.utcnow()
+    )
+
+    return rate

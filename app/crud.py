@@ -52,3 +52,20 @@ async def delete_insurance_rate(db: AsyncSession, rate_id: int):
     await db.delete(rate)
     await db.commit()
     return rate
+
+
+async def fetch_all_rates(db: AsyncSession):
+    query = select(InsuranceRate)
+    result = await db.execute(query)
+    return result.scalars().all()
+
+
+# app/crud.py
+async def fetch_rate_by_id(db: AsyncSession, rate_id: int):
+    query = select(InsuranceRate).where(InsuranceRate.id == rate_id)
+    result = await db.execute(query)
+    rate = result.scalars().first()
+    if not rate:
+        raise NoResultFound(f"Rate with id {rate_id} not found")
+    return rate
+
